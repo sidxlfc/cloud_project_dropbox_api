@@ -113,7 +113,9 @@ if(isset($_GET['fileToDownload']))
 		$dropbox->DownloadFile($download_name, "download.jpg");
 		unset($_GET['fileToDownload']);
 		header('Location: album.php');
-		header('Location: album.php');
+		echo '<script type="text/javascript">'
+ 			  , 'displayImage();'
+   			  , '</script>';
 	}
 
 	catch (Exception $e)
@@ -126,7 +128,12 @@ if(isset($_GET['fileToDownload']))
 <html>
 	<head>
 		<title>Pixellate</title>
-		
+		<script type="text/javascript">
+			function displayImage(){
+				var image = document.getElementById("changeThis");
+				image.src='download.jpg';
+			}
+		</script>
 	</head>
 
 	<body>
@@ -169,8 +176,8 @@ if(isset($_GET['fileToDownload']))
 		<br/>
 		<br/>
 		<br/>
-		<div name="ImageDiv">
-			<img src='download.jpg' height='500' width='500'/>
+		<div id="ImageDiv">
+			<img src="download.jpg" id='changeThis' height='500' width='500'/>
 		</div>
 	</body>
 </html>
