@@ -1,8 +1,8 @@
 <?php
 
 // display all errors on the browser
-error_reporting(E_ALL);
-ini_set('display_errors','On');
+//error_reporting(E_ALL);
+//ini_set('display_errors','On');
 
 // if there are many files in your Dropbox it can take some time, so disable the max. execution time
 set_time_limit(0);
@@ -74,17 +74,28 @@ function enable_implicit_flush()
 	echo "<!-- ".str_repeat(' ', 2000)." -->";
 }
 
+$imgSource=null;
 if(isset($_FILES['fileToUpload']))
 {
-	try
+	if ($_FILES['fileToUpload']['type'] == 'image/jpg' || $_FILES['fileToUpload']['type'] == 'image/jpeg')
 	{
-		$upload_name = $_FILES['fileToUpload']['name'];
-		$dropbox->UploadFile($_FILES['fileToUpload']['tmp_name'], $upload_name);
+		try
+		{
+			$upload_name = $_FILES['fileToUpload']['name'];
+			$dropbox->UploadFile($_FILES['fileToUpload']['tmp_name'], $upload_name);
+			//echo $upload_name;
+		}
+
+		catch (Exception $e)
+		{
+			print ($e);
+		}
 	}
 
-	catch (Exception $e)
+	else
 	{
-		print ($e);
+		//echo $_FILES['fileToUpload']['type']; 
+		echo "Only .jpg files allowed";
 	}
 }
 
@@ -110,12 +121,14 @@ if(isset($_GET['fileToDownload']))
 	{
 		echo $_GET['fileToDownload'];
 		$download_name = $_GET['fileToDownload'];
-		$dropbox->DownloadFile($download_name, "download.jpg");
-		unset($_GET['fileToDownload']);
-		header('Location: album.php');
-		echo '<script type="text/javascript">'
- 			  , 'displayImage();'
-   			  , '</script>';
+		$imgSource=$download_name;
+		$dropbox->DownloadFile($download_name,  "test_download_".basename($download_name));
+		//unset($_GET['fileToDownload']);
+		//header('Location: album.php');
+		//header('Location: album.php');
+		//echo '<script type="text/javascript">'
+ 		//	  , 'displayImage();'
+   		//	  , '</script>';
 	}
 
 	catch (Exception $e)
@@ -129,14 +142,25 @@ if(isset($_GET['fileToDownload']))
 	<head>
 		<title>Pixellate</title>
 		<script type="text/javascript">
-			function displayImage(){
-				var image = document.getElementById("changeThis");
+
+			function displayImage() {
+				/*var image = document.getElementById("changeThis");
 				image.src='download.jpg';
+				image.reset();*/
 			}
+
 		</script>
 	</head>
 
 	<body>
+		<div id="ImageDiv">
+			<?php
+			//echo $dropbox->GetLink($imgSource,false);
+			if(!is_null($imgSource)){
+				echo "<img src=".$dropbox->GetLink($imgSource,false)." height='500' width='500'/>";
+			}
+			?>
+		</div>
 		<form name="upload" method="POST" action="album.php" enctype="multipart/form-data">
 			<input type="file" name="fileToUpload">
 			<input type="submit" value="Upload Image" name="submit">
@@ -169,15 +193,11 @@ if(isset($_GET['fileToDownload']))
         				echo "</tr>";
         		}
         	}
-
         	echo "</table>";	
 		?>
 
 		<br/>
 		<br/>
 		<br/>
-		<div id="ImageDiv">
-			<img src="download.jpg" id='changeThis' height='500' width='500'/>
-		</div>
 	</body>
 </html>
